@@ -10,6 +10,4 @@
 
 ## Known gaps
 
-## Files changed and why
-
 ## AI assistance used

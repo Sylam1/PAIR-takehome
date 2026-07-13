@@ -1,128 +1,86 @@
-# Senior Full-Stack Take-Home: Reviewer Queue
+# Solution Engineering Take-Home: Reviewer Queue
 
-This repository contains a small existing full-stack application for a senior full-stack engineering take-home.
+This repository contains a small internal tool used to triage customer-facing review items. The goal of this challenge is to make a focused improvement in a realistic support workflow under time pressure.
 
-The goal is to assess how you improve a real but imperfect product slice under time pressure:
+This is designed for a junior engineer or solution engineer who wants to show they can:
 
-- understand an existing frontend and backend
-- identify the highest-impact workflow and UX issues
-- enforce business rules reliably
-- add targeted tests
-- explain pragmatic product and engineering tradeoffs
+- understand an existing backend and frontend
+- fix a real workflow issue
+- make a small product experience clearer for a human operator
+- think about how the system should communicate with a customer
+- explain a practical tradeoff clearly
+
+## Why this challenge fits solution engineering
+
+The example data reflects common customer support situations such as:
+
+- high-risk account changes
+- priority customer requests
+- repeated updates that may need escalation
+- document issues that require a clear next step
+
+The exercise is not about building a full platform. It is about making a small workflow feel reliable, understandable, and customer-aware.
 
 ## Timebox
 
-A strong senior candidate should be able to make a meaningful improvement in **60 minutes**.
+Aim to make one meaningful improvement in about 60 minutes.
 
-Please stop after **90 minutes** and ensure that your changes are pushed.
+Please stop after 90 minutes and ensure your changes are pushed.
 
-Only commits pushed within the 90-minute limit will be reviewed. Please do not push additional commits after the time limit.
-
-We do not expect you to fix every issue in the app.
-
-## Setup and submission workflow
-
-1. Fork this public repository into your own GitHub account.
-2. Work in your fork.
-3. Commit and push your changes to your fork before the 90-minute limit.
-4. Submit the link to your fork, your `SUBMISSION.md`, and your walkthrough recording.
-
-If your fork is private, please add `soccer-fan` and `muzer` as reviewers.
+You do not need to solve every issue in the app. A small, well-scoped improvement is better than a large incomplete rewrite.
 
 ## Scenario
 
-You are improving a small internal tool for an operations team.
+You are supporting a customer operations team that uses this tool to review account requests and decide what to do next.
 
-Reviewers use the tool to:
+A reviewer needs to answer three practical questions quickly:
 
-- see which review items need attention
-- inspect item details
-- claim work
-- approve, reject, or escalate items
+- What should I do with this request?
+- Who is handling it right now?
+- What should I tell the customer next?
 
-The tool should help a reviewer answer:
+The current app already has the basic queue and workflow actions, but it is missing some clarity around valid transitions and the next communication step.
 
-- what should I work on next?
-- who owns this item right now?
-- what information do I need to make a decision?
-- what actions are allowed on this item right now?
+## Recommended challenge
 
-## What you need to submit
+Pick one of these focused improvements and implement it well:
 
-This starter app intentionally contains product and engineering rough edges. Improve it as if you were preparing a small but important production change.
+1. Enforce the workflow rules more clearly on the backend
+   - only allow `claim` from `unassigned`
+   - only allow `approve`, `reject`, or `escalate` from `in_review`
+   - prevent terminal items from taking further action
+   - return clear errors for invalid actions
 
-Your final submission must include:
+2. Improve the reviewer experience in the UI
+   - show the current status and assignee more clearly
+   - surface a short, customer-friendly next-step message
+   - make it obvious when an action is allowed or blocked
+
+3. Add a simple customer communication hint
+   - show a draft message such as "We are reviewing your request" or "We need more information before we can proceed"
+   - keep it lightweight and template-based
+   - focus on clarity rather than polished copy
+
+## What to submit
+
+Your submission should include:
 
 - a working local app
-- fixes for the workflow correctness issues you judge most important
-- at least one deliberate product or UX improvement
-- a short `SUBMISSION.md`
-- a short recorded walkthrough, ideally **about 3 minutes**
+- one meaningful workflow or UX improvement
+- at least one backend or frontend test covering the behavior you changed
+- a short `SUBMISSION.md` explaining what you changed and why
 
-You have freedom to decide the best shape of the solution. We are interested in your judgment, not a checklist of framework-specific techniques.
+## Suggested implementation approach
 
-## How to approach the work
+A strong 60-minute solution could be:
 
-Use the timebox to make the strongest improvement you can. We recommend prioritizing in this order:
+- fix the state transition logic in the API
+- add a small message or guidance block in the detail view
+- add one targeted test for invalid or terminal-state actions
 
-1. **Workflow correctness**: state transitions should follow the rules below and invalid actions should fail cleanly.
-2. **Reviewer experience**: the app should help a reviewer understand the item, its ownership, and what they can do next.
-3. **Maintainability**: business rules should be easy to find, reason about, and test.
-4. **Tests**: add targeted coverage for high-risk behavior you changed.
-5. **Explanation**: document your decisions, known gaps, and how you used AI tools.
+That gives you a nice mix of backend logic, frontend polish, and customer-facing thinking without requiring a large implementation.
 
-You do not need to fix every issue in the app. We care more about well-chosen, coherent improvements than a long list of shallow changes.
-
-## Required workflow rules
-
-The reviewer workflow must support these actions:
-
-- `claim`
-- `approve`
-- `reject`
-- `escalate`
-
-Use these rules:
-
-- only items with status `unassigned` can be claimed
-- claiming an item moves it to `in_review`
-- claiming an item records the acting reviewer
-- only items with status `in_review` can be approved, rejected, or escalated
-- `approved`, `rejected`, and `escalated` are terminal states
-- terminal items must not allow further actions
-- invalid actions should be rejected cleanly
-
-For this exercise, you may hardcode the current reviewer identity as `alex`.
-
-## Queue behavior
-
-The active queue must exclude terminal items:
-
-- `approved`
-- `rejected`
-- `escalated`
-
-The active queue should be ordered by urgency:
-
-1. higher `risk_level` outranks lower (`high > medium > low`)
-2. within the same risk level, `priority` customers outrank `standard`
-3. within the same bucket, older items outrank newer items
-
-You may change how urgency is displayed if you think another presentation is clearer for reviewers.
-
-## Product judgment
-
-Make at least one deliberate product or UX improvement as part of your submission.
-
-Choose the improvement based on what you think matters most for the reviewer workflow. Be prepared to explain:
-
-- what problem you saw
-- why you prioritized it
-- what tradeoff you made inside the timebox
-
-You do not need polished visual design.
-
-## Running the app
+## Setup
 
 ### Backend
 
@@ -158,95 +116,15 @@ source .venv/bin/activate
 pytest
 ```
 
-You may add frontend or backend tests. Prefer tests that cover business behavior over broad snapshot or boilerplate coverage.
+You may add or adjust tests as needed. Focus on behavior that matters to the reviewer workflow.
 
-## What to submit
+## Submission notes
 
-Please send us:
+You can use [SUBMISSION_TEMPLATE.md](SUBMISSION_TEMPLATE.md) as a starting point for your write-up.
 
-1. a link to your GitHub fork with your implementation
-2. a `SUBMISSION.md`
-3. a short recorded walkthrough, ideally **about 3 minutes**
+A short walkthrough should ideally cover:
 
-Your fork must contain all commits you want us to review within the 90-minute limit. Commits pushed after the limit will not be counted.
-
-## `SUBMISSION.md` convention
-
-Write this in a way that makes your work easy to review. You can use the template below, or equivalent clear headings.
-
-```markdown
-# Submission
-
-## Summary of changes
-
-## Bugs fixed
-
-## Product/UX decisions
-
-## Tests added
-
-## Known gaps
-
-## Files changed and why
-
-## AI assistance used
-```
-
-Keep it concise. Specific, evidence-backed statements are more useful than generic descriptions.
-
-Good submissions make it clear:
-
-- what behavior changed
-- which files contain the important changes
-- what tests or manual checks you ran
-- what you intentionally did not address
-- how AI tools helped and how you reviewed their output
-
-You can start from [`SUBMISSION_TEMPLATE.md`](SUBMISSION_TEMPLATE.md).
-
-## Code comments
-
-You may use comments like this for non-obvious decisions:
-
-```ts
-// TAKEHOME: Explain the product or engineering tradeoff here.
-```
-
-or:
-
-```py
-# TAKEHOME: Explain the product or engineering tradeoff here.
-```
-
-Do not comment every change. Use these only when a reviewer would otherwise miss an important decision.
-
-## Loom walkthrough
-
-Please cover:
-
-- a quick demo of the fixed workflow
-- the highest-impact bug or UX issue you fixed
-- where the business rules are enforced
-- one product tradeoff you made
-- what you would improve next with more time
-
-## What we are looking for
-
-We will review:
-
-- whether the workflow rules are correctly enforced
-- whether the reviewer experience is clear and practical
-- whether tests cover meaningful behavior
-- whether your code is maintainable for a small product team
-- whether your written and recorded explanations match the actual implementation
-
-We are not looking for:
-
-- production infrastructure
-- deployment
-- authentication
-- a full database migration
-- pixel-perfect design
-- large rewrites for their own sake
-
-AI tools are allowed. We expect you to understand, own, and be able to defend the final submission.
+- the workflow problem you chose to fix
+- how you handled the backend and frontend changes
+- how the app now helps a reviewer communicate with the customer
+- one tradeoff you made inside the timebox
