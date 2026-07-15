@@ -4,22 +4,11 @@ This repository contains a small internal tool used to triage customer-facing re
 
 This is designed for a junior engineer or solution engineer who wants to show they can:
 
-- understand an existing backend and frontend
+- understand an existing backend or frontend
 - fix a real workflow issue
 - make a small product experience clearer for a human operator
 - think about how the system should communicate with a customer
-- explain a practical tradeoff clearly
-
-## Why this challenge fits solution engineering
-
-The example data reflects common customer support situations such as:
-
-- high-risk account changes
-- priority customer requests
-- repeated updates that may need escalation
-- document issues that require a clear next step
-
-The exercise is not about building a full platform. It is about making a small workflow feel reliable, understandable, and customer-aware.
+- explain the issue and fix so a customer can understand clearly
 
 ## Timebox
 
@@ -127,4 +116,4 @@ A short walkthrough should ideally cover:
 - the workflow problem you chose to fix
 - how you handled the backend and frontend changes
 - how the app now helps a reviewer communicate with the customer
-- one tradeoff you made inside the timebox
+- how you would communicate this to the customer
