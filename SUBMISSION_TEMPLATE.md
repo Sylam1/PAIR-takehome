@@ -8,6 +8,6 @@
 
 ## Tests added
 
-## Known gaps
+## Customer Message
 
 ## AI assistance used
