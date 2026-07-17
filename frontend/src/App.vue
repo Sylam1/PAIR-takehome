@@ -190,6 +190,20 @@ onMounted(loadItems);
             Escalate
           </button>
         </div>
+
+        <hr class="divider" />
+
+        <div class="suggested-response">
+          <h3>Suggested Response Template</h3>
+          <p class="response-tip">Use this pre-populated draft to update the customer:</p>
+          <textarea 
+            class="response-box" 
+            readonly 
+            :value="selectedItem.default_message"
+            rows="10"
+          ></textarea>
+        </div>
+
       </section>
     </section>
   </main>

@@ -9,7 +9,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-
 DATA_FILE = Path(__file__).resolve().parents[2] / "data" / "review_items.json"
 
 ReviewAction = Literal["claim", "approve", "reject", "escalate"]
@@ -59,12 +58,18 @@ async def list_review_items(active_only: bool = True) -> dict:
         items = [item for item in items if item["status"] != "approved"]
 
     items.sort(key=lambda item: item["submitted_at"], reverse=True)
+
+    for item in items:
+        item["default_message"] = generate_default_message(item)
+
     return {"items": items}
 
 
 @app.get("/review-items/{item_id}")
 async def get_review_item(item_id: str) -> dict:
     item = find_item(item_id)
+    item["default_message"] = generate_default_message(item)
+
     return {"item": deepcopy(item)}
 
 
@@ -83,6 +88,8 @@ async def apply_action(item_id: str, request: ActionRequest) -> dict:
         item["status"] = status_for_action(request.action)
     else:
         raise HTTPException(status_code=400, detail="Unsupported action")
+    
+    item["default_message"] = message.generate_default_message(item)
 
     return {"item": deepcopy(item)}
 
@@ -102,3 +109,35 @@ def status_for_action(action: ReviewAction) -> str:
     if action == "escalate":
         return "escalated"
     return "in_review"
+
+def generate_default_message(item: dict) -> str:
+    """ generates a personalised suggestion message based on the ticket and the customer """
+    tier = str(item.get("customer_tier", "Standard")).upper()
+    risk = str(item.get("risk_level", "low")).lower()
+    title = item.get("title", "your recent ticket")
+
+    if tier == "PRIORITY":
+        greeting = "Dear Valued Customer,"
+        sign_off = "Sincerely, PAIR Solutions Engineering Team"
+    elif tier == "STANDARD":
+        greeting = "Hi there,"
+        sign_off = "Best regards, PAIR Solutions Engineering Team"
+
+    if risk == "high":
+        sla_timeframe = "immediately (within the next 2 hours)"
+        urgency_note = "We have flagged this issue as critical."
+    elif risk == "medium":
+        sla_timeframe = "within 24 hours"
+        urgency_note = "We are currently triaging this with standard high priority."
+    else:
+        sla_timeframe = "within 2 to 3 business days"
+        urgency_note = "We will handle this as part of our scheduled maintenance queue."
+
+    return (
+        f"{greeting}\n\n"
+        f"Thank you for contacting us regarding your issue: '{title}'.\n\n"
+        f"{urgency_note} As a {item.get('customer_tier', 'Standard')} tier partner, we expect to have a full resolution "
+        f"or detailed update for you {sla_timeframe}.\n\n"
+        f"If you have any further details to add in the meantime, please reply directly to this message.\n\n"
+        f"{sign_off}"
+    )
