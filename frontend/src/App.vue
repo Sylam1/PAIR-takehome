@@ -14,9 +14,47 @@ const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 const pendingAction = ref<ReviewAction | null>(null);
 
+// filter types (only three are possible)
+type RiskLevel = "high" | "medium" | "low";
+
+// state of selected risk, defaulting to high (first shown to user)
+const selectedRisk = ref<RiskLevel>("high");
+
+// filter items based on the active tab, lower now used as fall back
+const filteredItems = computed(() => {
+  return items.value.filter(
+    (item) => item.risk_level.toLowerCase() === selectedRisk.value
+  );
+});
+
 const selectedItem = computed(() =>
   items.value.find((item) => item.id === selectedId.value) ?? items.value[0] ?? null
 );
+
+// function to switch tabs and reset the active item focus as we switch
+function setRiskFilter(risk: RiskLevel) {
+  selectedRisk.value = risk;
+  const firstInFiltered = items.value.find(
+    (item) => item.risk_level.toLowerCase() === risk
+  );
+  selectedId.value = firstInFiltered?.id ?? null;
+}
+
+// function for assigning css 
+function getRiskClass(risk: string) {
+  const norm = risk.toLowerCase();
+  if (norm === "high") return "risk-high";
+  if (norm === "medium") return "risk-medium";
+  if (norm === "low") return "risk-low";
+  return "";
+}
+
+// function for calculating number of tickets in certain risk category
+function getTicketCount(risk: RiskLevel): number {
+  return items.value.filter(
+    (item) => item.risk_level.toLowerCase() === risk
+  ).length;
+}
 
 async function loadItems() {
   isLoading.value = true;
@@ -73,18 +111,38 @@ onMounted(loadItems);
 
     <section v-else class="workspace">
       <aside class="queue-list" aria-label="Review queue">
-        <button
-          v-for="item in items"
-          :key="item.id"
-          class="queue-item"
-          :class="{ selected: item.id === selectedItem?.id }"
-          type="button"
-          @click="selectedId = item.id"
-        >
-          <span class="queue-title">{{ item.title }}</span>
-          <span class="queue-meta">{{ item.risk_level }} risk · {{ item.customer_tier }}</span>
-          <span class="queue-meta">{{ item.status }} · {{ item.assigned_reviewer ?? "unassigned" }}</span>
-        </button>
+        
+        <nav class="risk-tabs" aria-label="Filter by risk">
+          <button
+            v-for="risk in (['high', 'medium', 'low'] as const)"
+            :key="risk"
+            type="button"
+            class="tab-button"
+            :class="{ active: selectedRisk === risk }"
+            @click="setRiskFilter(risk)"
+          >
+            {{ risk.charAt(0).toUpperCase() + risk.slice(1) }}
+            <span class="tab-count">({{ getTicketCount(risk) }})</span>
+          </button>
+        </nav>
+
+        <div class="queue-items-wrapper">
+          <button
+            v-for="item in filteredItems"
+            :key="item.id"
+            class="queue-item"
+            :class="{ selected: item.id === selectedItem?.id }"
+            type="button"
+            @click="selectedId = item.id"
+          >
+            <span class="queue-title">{{ item.title }}</span>
+            <span class="queue-meta">
+              <strong :class="getRiskClass(item.risk_level)">{{ item.risk_level }} risk</strong> 
+              · {{ item.customer_tier }}
+            </span>
+            <span class="queue-meta">{{ item.status }} · {{ item.assigned_reviewer ?? "unassigned" }}</span>
+          </button>
+        </div>
       </aside>
 
       <section v-if="selectedItem" class="detail-panel">
